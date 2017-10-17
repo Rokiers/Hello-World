@@ -1,0 +1,156 @@
+/*
+@author Lable
+多项式相加  (两个多项式要求递增排序)
+*/
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct {
+	float coef;			//系数
+	int expn;			//指数
+}Datatype;
+
+typedef struct Node{
+	Datatype data;     //数据
+	struct Node * next;		//指针
+}LNode,*LinkList;
+
+LinkList create_LinkList(LinkList L);		//判断指数是否为0，为0跳出create
+
+LinkList Location(LinkList L,int x);   //x是节点的指数
+
+LinkList add_LinkList(LinkList La,LinkList Lb);			//La和Lb合并之后的链表为La
+
+void print_LinkList(LinkList L);
+/*                          //此为自己定义的链表，用来验证
+
+LinkList create_LinkList(LinkList L)
+{
+	int i=1;
+LinkList r,s;
+r = L;
+while(i<7)
+{
+s = (LinkList)malloc(sizeof(LNode));
+s->data.coef = i;
+s->data.expn = i;
+i+=2;
+r->next = s;
+r = r->next;
+}
+r->next = NULL;
+return L;
+}
+*/
+
+LinkList create_LinkList(LinkList L)
+{
+	float coef;
+	int expn=1;
+while(expn)
+{
+	scanf("%f %d",&coef,&expn);
+	if(!expn)  break;
+	LinkList t,p;						//t是当前创造的节点，p是定位的上一节点
+	t = (LinkList)malloc(sizeof(LNode));
+	t->data.coef = coef;
+	t->data.expn = expn;
+	p = Location(L,t->data.expn);
+	t->next = p->next;
+	p->next = t;
+}
+return L;
+}
+
+LinkList Location(LinkList L,int x)					//未考虑插入事指数相同的处理
+{
+		LinkList r;
+		r = L;
+		while(r->next)
+		{
+			if(r->next->data.expn>x) break;
+			r = r->next;
+		}
+		return r;
+}
+
+
+LinkList add_LinkList(LinkList La,LinkList Lb)
+{
+		LinkList la,lb;
+		LinkList s,r;						//s是要释放的指针，r是尾指针
+		la = La->next;
+		lb = Lb->next;
+		r = La;
+		while(la&&lb)
+		{
+			if(la->data.expn > lb->data.expn)
+			{
+			r->next = lb;
+			r = r->next;
+			lb = lb->next;
+			}
+			if(la->data.expn < lb->data.expn)
+			{
+				r->next = la;
+				r = r->next;
+				la = la->next;
+			}
+			if(la->data.expn == lb->data.expn)
+			{
+			if(la->data.coef + lb->data.coef != 0)
+				{
+				la->data.coef = la->data.coef + lb->data.coef;
+				r->next = la;
+				r = r->next;
+				la = la->next;
+				s=lb;
+				lb = lb->next;
+				free(s);
+				}
+			else{
+				s=la;
+				la = la->next;
+				free(la);
+				s = lb;
+				lb = lb->next;
+				free(lb);
+				}
+			}
+		}
+		if(lb) r->next = lb;
+		else  r->next = la;
+		free(Lb);
+		return La;
+}
+
+void print_LinkList(LinkList L)
+{
+	LinkList r;
+	r = L->next;
+		while(r)
+		{
+		printf("%.1fX^%d",r->data.coef,r->data.expn);
+		if(r->next)
+		printf("+");
+		r = r->next;
+		}
+	printf("\n");
+}
+
+int main()
+{
+LinkList La,Lb,Lc;
+La = (LinkList)malloc(sizeof(LNode));
+Lb = (LinkList)malloc(sizeof(LNode));
+Lc = (LinkList)malloc(sizeof(LNode));
+La->next = NULL;
+Lb->next = NULL;
+La = create_LinkList(La);
+Lb = create_LinkList(Lb);
+print_LinkList(La);
+print_LinkList(Lb);
+Lc = add_LinkList(La,Lb);
+print_LinkList(Lc);
+return 0;
+}
+
